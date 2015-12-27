@@ -1,29 +1,27 @@
 #!/usr/bin/env python3
 from collections import OrderedDict
 
-nodes = OrderedDict()
+class CycleException(Exception):
+    pass
 
 class DepsManager:
     def __init__(self):
         self.deps = []
-        self.ordered = []
 
     def add_deps(self, before, after):
         self.deps.append((before,after))
 
     def sort(self):
         nodes = self._make_struct()
-        while True:
+        ordered = []
+        while nodes:
             first = self._find_first(nodes)
             if first is not None:
                 self._clean(nodes, first)
-                self.ordered.append(first)
+                ordered.append(first)
             elif nodes:
-                print("Cycles")
-                break
-            else:
-                print("No Cycles")
-                break
+                raise CycleException("Cycle found")
+        return ordered    
                 
     def _clean(self, nodes, first):
         assert first in nodes # first in nodes
@@ -62,13 +60,16 @@ class DepsManager:
 
 if __name__ == '__main__':
     print("Started")
-    d = DepsManager()
-    d.add_deps(1,2)
-    d.add_deps(2,3)
-    d.add_deps(2,5)
-    d.add_deps(4,6)
-    #cycle
-    d.add_deps(3,1)
-    d.sort()
-    print("ordered", d.ordered)
+    try:
+        d = DepsManager()
+        d.add_deps(1,2)
+        d.add_deps(2,3)
+        d.add_deps(2,5)
+        d.add_deps(4,6)
+        #cycle
+        d.add_deps(3,1)
+        
+        print("ordered", d.sort())
+    except CycleException as e:
+        print("Cycle found", e)
 
