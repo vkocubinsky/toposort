@@ -2,25 +2,29 @@
 from collections import OrderedDict
 from pprint import pprint
 
+# TODO: add simple parser
+# TODO: add tests and exampes
+# TODO: print first cycle
+
 class CycleException(Exception):
     pass
 
 class GraphIndex:
     def __init__(self):
         # Nodes table wich keep list of before nodes.
-        # A -> C, B -> C
-        # {A: {}, B: {}, 'C': {'A':1, 'B':1}}
+        # a -> c, b -> c
+        # {a: {}, b: {}, 'c': {'a':1, 'b':1}}
         self.before_table = OrderedDict()
         
         # Nodes table wich keep list of after nodes.
-        # A -> C, B -> C
-        # {'A': {'C':1}, 'B': {'C':1}, C: {}}
+        # a -> c, b -> c
+        # {'a': {'c':1}, 'b': {'c':1}, c: {}}
         self.after_table = OrderedDict() 
 
 
         # Nodes with empty before table
-        # A -> C, B -> C
-        # {'A':1, 'B':1}
+        # a -> c, b -> c
+        # {'a':1, 'b':1}
         self.zero_table = OrderedDict() 
 
     def table__str__(self, table):
@@ -99,6 +103,26 @@ class DepsManager:
         if index.before_table:
             raise CycleException("Cycle found")
         return ordered    
+
+
+# Right Topologies a,b,c
+# no lines: a, b, c
+# 2 line: a < b, c
+# 3 line: a < b < c
+# split : a < (b,c)
+# join : (a,b) < c   
+ 
+# Cycles
+# 1 line cycle: a < a, b, c
+# 2 line cycle: a < b < a, c
+# 3 line cycle: a < b < c < a
+
+# Mix
+# join and cycle either: (a,b) < c, c < a, c < b
+# join and cycle one: (a,b) < c, c < a
+# split and cycle either: a < (b,c), b < a, c < a 
+# split and cycle one: a < (b,c), b < a
+
 
 
 if __name__ == '__main__':
