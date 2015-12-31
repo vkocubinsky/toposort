@@ -43,25 +43,25 @@ Zero Set: {zero_table})""".format(
                 )
 
     def add(self, before, after):
-        assert before != after
-        # initialize before_table
+        # Initialize before_table
         if after not in self.before_table:
             self.before_table[after] = OrderedDict()
             self.zero_table[after] = 1
         if before not in self.before_table:
             self.before_table[before] = OrderedDict()
             self.zero_table[before] = 1
-        # initialize after_table    
+        # Initialize after_table    
         if after not in self.after_table:
             self.after_table[after] = OrderedDict()
         if before not in self.after_table:
             self.after_table[before] = OrderedDict()
 
-        #put deps
-        self.before_table[after][before] = 1
-        self.after_table[before][after] = 1
+        # Put deps
+        if after != before:
+            self.before_table[after][before] = 1
+            self.after_table[before][after] = 1
 
-        if after in self.zero_table:
+        if after != before and after in self.zero_table:
             del self.zero_table[after]
 
     def pop_zero(self):
@@ -82,16 +82,16 @@ Zero Set: {zero_table})""".format(
                 self.zero_table[k] = 1
         del self.after_table[first]
 
-class DepsManager:
+class Graph:
     def __init__(self):
-        self.deps = []
+        self.edges = []
 
-    def add_deps(self, before, after):
-        self.deps.append((before,after))
+    def add_edge(self, before, after):
+        self.edges.append((before,after))
 
     def sort(self):
         index = GraphIndex()
-        for before,after in self.deps:
+        for before,after in self.edges:
             index.add(before,after)
         ordered = []
         while True:
@@ -123,19 +123,28 @@ class DepsManager:
 # Split and cycle either: a < (b,c), b < a, c < a 
 # Split and cycle one: a < (b,c), b < a
 # Duplicate: a < b , a < b
-# Transitive: a < b, b < c, a < c
+# Transitive Duplicate: a < b, b < c, a < c
+
+
+# Dictionary
+# edge 
+# vertex, vertices, nodes  
+# transitivity, reflectivity, antisymmetry
+# class Node, class edge
+# a < b, a == a, {a < b, a == a, c > a, a < b < c}
+# See Python condition
 
 if __name__ == '__main__':
     print("Started")
     try:
-        d = DepsManager()
-        d.add_deps(1,2)
-        d.add_deps(2,3)
-        d.add_deps(2,5)
-        d.add_deps(4,6)
+        d = Graph()
+        d.add_edge(1,2)
+        d.add_edge(2,3)
+        d.add_edge(2,5)
+        d.add_edge(4,6)
         print("ordered", d.sort())
         #cycle
-        d.add_deps(3,1)
+        d.add_edge(3,1)
         print("ordered", d.sort())
     except CycleException as e:
         print("Cycle found", e)
