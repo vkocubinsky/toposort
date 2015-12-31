@@ -106,24 +106,24 @@ class DepsManager:
 
 
 # Right Topologies a,b,c
-# no lines: a, b, c
-# 2 line: a < b, c
+# no lines: a = a, b = b, c = c
+# 2 line: a < b, c = c
 # 3 line: a < b < c
 # split : a < (b,c)
 # join : (a,b) < c   
  
 # Cycles
-# 1 line cycle: a < a, b, c
-# 2 line cycle: a < b < a, c
+# 1 line cycle: a < a, b = b, c = c
+# 2 line cycle: a < b < a, c = c
 # 3 line cycle: a < b < c < a
 
 # Mix
-# join and cycle either: (a,b) < c, c < a, c < b
-# join and cycle one: (a,b) < c, c < a
-# split and cycle either: a < (b,c), b < a, c < a 
-# split and cycle one: a < (b,c), b < a
-
-
+# Join and cycle either: (a,b) < c, c < a, c < b
+# Join and cycle one: (a,b) < c, c < a
+# Split and cycle either: a < (b,c), b < a, c < a 
+# Split and cycle one: a < (b,c), b < a
+# Duplicate: a < b , a < b
+# Transitive: a < b, b < c, a < c
 
 if __name__ == '__main__':
     print("Started")
