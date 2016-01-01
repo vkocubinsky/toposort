@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 from collections import OrderedDict
-from pprint import pprint
 
-# TODO: add simple parser
 # TODO: print first cycle
-# TODO: distinguish < and <= 
-    # test a < a cycle
-    # test a <= a
+# TODO: rich node, edge, set classes
+# TODO: permutation test
+# TODO: setup
 
 class CycleException(Exception):
     pass
