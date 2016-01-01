@@ -3,8 +3,10 @@ from collections import OrderedDict
 from pprint import pprint
 
 # TODO: add simple parser
-# TODO: add tests and exampes
 # TODO: print first cycle
+# TODO: distinguish < and <= 
+    # test a < a cycle
+    # test a <= a
 
 class CycleException(Exception):
     pass
@@ -82,6 +84,16 @@ Zero Set: {zero_table})""".format(
                 self.zero_table[k] = 1
         del self.after_table[first]
 
+def graph_from_edges(edges):
+    g = Graph()
+    for edge in edges:
+        g.add_edge(*edge)
+    return g
+
+def sort_edges(edges):
+    g = graph_from_edges(edges)
+    return g.sort()
+
 class Graph:
     def __init__(self):
         self.edges = []
@@ -103,49 +115,4 @@ class Graph:
         if index.before_table:
             raise CycleException("Cycle found")
         return ordered    
-
-
-# Right Topologies a,b,c
-# no lines: a = a, b = b, c = c
-# 2 line: a < b, c = c
-# 3 line: a < b < c
-# split : a < (b,c)
-# join : (a,b) < c   
- 
-# Cycles
-# 1 line cycle: a < a, b = b, c = c
-# 2 line cycle: a < b < a, c = c
-# 3 line cycle: a < b < c < a
-
-# Mix
-# Join and cycle either: (a,b) < c, c < a, c < b
-# Join and cycle one: (a,b) < c, c < a
-# Split and cycle either: a < (b,c), b < a, c < a 
-# Split and cycle one: a < (b,c), b < a
-# Duplicate: a < b , a < b
-# Transitive Duplicate: a < b, b < c, a < c
-
-
-# Dictionary
-# edge 
-# vertex, vertices, nodes  
-# transitivity, reflectivity, antisymmetry
-# class Node, class edge
-# a < b, a == a, {a < b, a == a, c > a, a < b < c}
-# See Python condition
-
-if __name__ == '__main__':
-    print("Started")
-    try:
-        d = Graph()
-        d.add_edge(1,2)
-        d.add_edge(2,3)
-        d.add_edge(2,5)
-        d.add_edge(4,6)
-        print("ordered", d.sort())
-        #cycle
-        d.add_edge(3,1)
-        print("ordered", d.sort())
-    except CycleException as e:
-        print("Cycle found", e)
 

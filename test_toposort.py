@@ -7,7 +7,6 @@ from toposort import *
 # Right Topologies a,b,c
 # no lines: a = a, b = b, c = c
 # 2 line: a < b, c = c
-# => CURSOR
 # 3 line: a < b < c
 # split : a < (b,c)
 # join : (a,b) < c   
@@ -16,6 +15,8 @@ from toposort import *
 # 1 line cycle: a < a, b = b, c = c
 # 2 line cycle: a < b < a, c = c
 # 3 line cycle: a < b < c < a
+
+# => CURSOR
 
 # Mix
 # Join and cycle either: (a,b) < c, c < a, c < b
@@ -33,37 +34,69 @@ from toposort import *
 # class Node, class edge
 # a < b, a == a, {a < b, a == a, c > a, a < b < c}
 # See Python condition
-class TestGraphIndex(unittest.TestCase):
 
-  def test_no_lines(self):
-      """ no lines: a = a, b = b, c = c"""
-      g = Graph()
-      g.add_edge('a','a')
-      g.add_edge('b','b')
-      g.add_edge('c','c')
+a = 'a'
+b = 'b'
+c = 'c'
+abc = ['a','b','c']
 
-      ordered = g.sort()
-      self.assertEqual(3, len(ordered))
-      self.assertTrue(all([x in ordered for x in 'abc']))
+class TestABC(unittest.TestCase):
 
-  def test_2_line(self):
-      """ 2 line: a < b, c = c """
-      g = Graph()
-      g.add_edge('a','b')
-      g.add_edge('c','c')
+    def assertSort(self, edges, unordered, ordered):
+        self.assertCountEqual(unordered, ordered)
+        self.assertOrder(edges, ordered)
 
-      ordered = g.sort()
-      self.assertEqual(3, len(ordered))
-      self.assertTrue(all([x in ordered for x in 'abc']))
-      self.assertTrue(ordered.index('a') < ordered.index('b')) 
+    def assertOrder(self, edges, ordered):
+        for edge in edges:
+            before, after = edge
+            with self.subTest(edge='{} < {}'.format(*edge)):
+                if edge[0] != edge[1]:
+                    self.assertOrderLess(*edge,ordered)
 
+    def assertOrderLess(self, a, b, ordered):
+        self.assertTrue(ordered.index(a) < ordered.index(b)) 
 
-  def test_split(self):
-      s = 'hello world'
-      self.assertEqual(s.split(), ['hello', 'world'])
-      # check that s.split fails when the separator is not a string
-      with self.assertRaises(TypeError):
-          s.split(2)
+    def test_no_lines(self):
+        """ No lines: a = a, b = b, c = c"""
+        edges = [(a,a), (b,b), (c,c)]
+        ordered = sort_edges(edges)
+        self.assertSort(edges, abc, ordered)
+
+    def test_2_nodes_line(self):
+        """ 2 nodes line: a < b, c = c """
+        edges = [(a,b),(c,c)]
+        ordered = sort_edges(edges)
+        self.assertSort(edges, abc, ordered)
+
+    def test_3_nodes_line(self):
+        """ 3 nodes line: a < b < c """
+        edges = [(a,b),(b,c)]
+        ordered = sort_edges(edges)
+        self.assertSort(edges, abc, ordered)
+
+    def test_split(self):
+        """ Split : a < b, a < c """
+        edges = [(a,b),(a,c)]
+        ordered = sort_edges(edges)
+        self.assertSort(edges, abc, ordered)
+
+    def test_join(self):
+        """ Join : a < c, b < c """  
+        edges = [(a,c),(b,c)]
+        ordered = sort_edges(edges)
+        self.assertSort(edges, abc, ordered)
+
+    def test_2_nodes_cycle(self):
+        """ 2 nodes line cycle: a < b < a, c = c """
+        edges = [(a,b),(b,a),(c,c)]
+        with self.assertRaises(CycleException):
+            sort_edges(edges)
+
+    def test_3_nodes_cycle(self):
+        """ 3 nodes line cycle: a < b < c < a """
+        edges = [(a,b),(b,c),(c,a)]
+        with self.assertRaises(CycleException):
+            sort_edges(edges)
 
 if __name__ == '__main__':
     unittest.main()
