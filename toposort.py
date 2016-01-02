@@ -2,9 +2,9 @@
 from collections import OrderedDict
 
 # TODO: print first cycle
-# TODO: rich node, edge, set classes
-# TODO: permutation test
 # TODO: setup
+# TODO: rich node, edge, set classes
+# TODO: permutation test?
 
 class CycleException(Exception):
     pass
