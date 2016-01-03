@@ -4,6 +4,7 @@ import sys
 
 def produce_data(limit):
     for n in range(2,limit + 1):
+        yield (n,n)
         for m in range(2, n//2 + 1):
             if n%m == 0:
                 yield (m,n)
