@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from collections import OrderedDict
+import fileinput
 
 # TODO: print first cycle
 # TODO: setup
@@ -113,4 +114,12 @@ class Graph:
         if index.before_table:
             raise CycleException("Cycle found")
         return ordered    
+
+if __name__ == '__main__':
+    g = Graph()
+    for line in fileinput.input():
+        before, after = line.split() 
+        g.add_edge(before, after)
+    for n in g.sort():
+        print(n)
 

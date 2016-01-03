@@ -3,4 +3,6 @@ tags
 *.pyc
 dist/
 toposort.egg-info/
+*.data
+
 
