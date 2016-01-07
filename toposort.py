@@ -2,11 +2,15 @@
 from collections import OrderedDict
 import fileinput
 
-# TODO: print first cycle
 # TODO: setup
+# TODO: support None value
+# TODO: investigte into yield
 
 class CycleException(Exception):
-    pass
+
+    def __init__(self,cycle):
+        Exception.__init__(self,cycle)
+        self.cycle = cycle
 
 class GraphIndex:
     def __init__(self):
@@ -72,6 +76,7 @@ Zero Set: {zero_table})""".format(
 
     def _remove(self, n1):
         assert n1 in self.prev_table
+        assert n1 in self.next_table
         assert not self.prev_table[n1]
         
         del self.prev_table[n1]            
@@ -80,6 +85,20 @@ Zero Set: {zero_table})""".format(
             if not self.prev_table[n2]:
                 self.zero_table[n2] = 1
         del self.next_table[n1]
+
+    def first_cycle(self):
+        assert self.prev_table
+        assert self.next_table
+        cycle = OrderedDict()
+        n = next(iter(self.next_table))
+        while self.next_table[n]:
+            if n in cycle:
+                return list(cycle.keys())
+            else:
+                cycle[n]=1
+                n = next(iter(self.next_table[n]))
+        raise AssertioError('Cycle not found') 
+
 
 def graph_from_edges(edges):
     g = Graph()
@@ -110,7 +129,7 @@ class Graph:
             else:
                 break
         if index.prev_table:
-            raise CycleException("Cycle found")
+            raise CycleException(index.first_cycle())
         return ordered    
 
 if __name__ == '__main__':

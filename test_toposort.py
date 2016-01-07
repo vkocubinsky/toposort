@@ -10,9 +10,11 @@ abc = ['a','b','c']
 
 class TestToposort(unittest.TestCase):
 
-    def assertCycle(self, edges):
-        with self.assertRaises(CycleException):
+    def assertCycle(self, edges, cycle=None):
+        with self.assertRaises(CycleException) as e:
             sort_edges(edges)
+        if cycle: 
+            self.assertEqual(cycle, e.exception.cycle)    
 
     def assertSort(self, edges, unordered, ordered):
         self.assertCountEqual(unordered, ordered)
@@ -61,33 +63,32 @@ class TestToposort(unittest.TestCase):
     def test_2_nodes_cycle(self):
         """2 nodes line cycle: a < b < a, c = c"""
         edges = [(a,b),(b,a),(c,c)]
-        with self.assertRaises(CycleException):
-            sort_edges(edges)
+        self.assertCycle(edges, [a,b])
 
     def test_3_nodes_cycle(self):
         """3 nodes line cycle: a < b < c < a"""
         edges = [(a,b),(b,c),(c,a)]
-        self.assertCycle(edges)
+        self.assertCycle(edges,[a,b,c])
 
     def test_join_and_cycle_either(self):
         """Join and cycle either: a < c, b < c, c < a, c < b"""
         edges = [(a,c),(b,c),(c,a),(c,b)]
-        self.assertCycle(edges)
+        self.assertCycle(edges, [a,c]) # there are 2 cycle
 
     def test_join_and_cycle_one(self):
         """Join and cycle either: a < c, b < c, c < a"""
         edges = [(a,c),(b,c),(c,a)]
-        self.assertCycle(edges)
+        self.assertCycle(edges,[a,c])
 
     def test_split_and_cycle_either(self):
         """Split and cycle either: a < b, a < c, b < a, c < a"""
         edges = [(a,b),(a,c),(b,a),(c,a)]
-        self.assertCycle(edges)
+        self.assertCycle(edges, [a,b]) # there are 2 cycle
 
     def test_split_and_cycle_one(self):
         """Split and cycle one: a < b, a < c, b < a"""
         edges = [(a,b),(a,c),(b,a)]
-        self.assertCycle(edges)
+        self.assertCycle(edges, [a,b])
 
     def test_duplicate(self):
         """Duplicate: a < b , a < b, c = c"""
