@@ -4,84 +4,82 @@ import fileinput
 
 # TODO: print first cycle
 # TODO: setup
-# TODO: rich node, edge, set classes
-# TODO: permutation test?
 
 class CycleException(Exception):
     pass
 
 class GraphIndex:
     def __init__(self):
-        # Nodes table wich keep list of before nodes.
-        # a -> c, b -> c
-        # {a: {}, b: {}, 'c': {'a':1, 'b':1}}
-        self.before_table = OrderedDict()
-        
-        # Nodes table wich keep list of after nodes.
         # a -> c, b -> c
         # {'a': {'c':1}, 'b': {'c':1}, c: {}}
-        self.after_table = OrderedDict() 
+        self.next_table = OrderedDict() 
 
-
-        # Nodes with empty before table
+        # a -> c, b -> c
+        # {a: {}, b: {}, 'c': {'a':1, 'b':1}}
+        self.prev_table = OrderedDict()
+        
+        # Nodes with no previous 
         # a -> c, b -> c
         # {'a':1, 'b':1}
         self.zero_table = OrderedDict() 
 
-    def table__str__(self, table):
-        ts = ["\n    {k}: {vs}".format(k=k,vs=list(v.keys())) 
-                for k,v in table.items()]
-        return "".join(ts)
 
     def __str__(self):
+
+        def table__str__(table):
+            ts = ["\n    {k}: {vs}".format(k=k,vs=list(v.keys())) 
+                    for k,v in table.items()]
+            return "".join(ts)
+
         return """GraphIndex(
-Before Table: {before_table}
-After Table: {after_table}
+Next Table: {next_table}
+Prev Table: {prev_table}
 Zero Set: {zero_table})""".format(
-            before_table=self.table__str__(self.before_table),
-            after_table=self.table__str__(self.after_table),
+            prev_table=table__str__(self.prev_table),
+            next_table=table__str__(self.next_table),
             zero_table=list(self.zero_table.keys())    
                 )
 
-    def add(self, before, after):
-        # Initialize before_table
-        if after not in self.before_table:
-            self.before_table[after] = OrderedDict()
-            self.zero_table[after] = 1
-        if before not in self.before_table:
-            self.before_table[before] = OrderedDict()
-            self.zero_table[before] = 1
-        # Initialize after_table    
-        if after not in self.after_table:
-            self.after_table[after] = OrderedDict()
-        if before not in self.after_table:
-            self.after_table[before] = OrderedDict()
+    def add(self, n1, n2):
+        # Initialize next_table    
+        if n1 not in self.next_table:
+            self.next_table[n1] = OrderedDict()
+        if n2 not in self.next_table:
+            self.next_table[n2] = OrderedDict()
+
+        # Initialize prev_table
+        if n1 not in self.prev_table:
+            self.prev_table[n1] = OrderedDict()
+            self.zero_table[n1] = 1
+        if n2 not in self.prev_table:
+            self.prev_table[n2] = OrderedDict()
+            self.zero_table[n2] = 1
 
         # Put deps
-        if after != before:
-            self.before_table[after][before] = 1
-            self.after_table[before][after] = 1
+        if n2 != n1:
+            self.next_table[n1][n2] = 1
+            self.prev_table[n2][n1] = 1
 
-        if after != before and after in self.zero_table:
-            del self.zero_table[after]
+        if n2 != n1 and n2 in self.zero_table:
+            del self.zero_table[n2]
 
     def pop_zero(self):
         if self.zero_table:
-            first = self.zero_table.popitem(last=False)
-            self.remove(first[0])
-            return first[0]
+            n1,_one = self.zero_table.popitem(last=False)
+            self._remove(n1)
+            return n1
 
 
-    def remove(self, first):
-        assert first in self.before_table, "{} not in {}".format(first, self.before_table)
-        assert not self.before_table[first]
+    def _remove(self, n1):
+        assert n1 in self.prev_table
+        assert not self.prev_table[n1]
         
-        del self.before_table[first]            
-        for k in self.after_table[first].keys():
-            del self.before_table[k][first]
-            if not self.before_table[k]:
-                self.zero_table[k] = 1
-        del self.after_table[first]
+        del self.prev_table[n1]            
+        for n2 in self.next_table[n1].keys():
+            del self.prev_table[n2][n1]
+            if not self.prev_table[n2]:
+                self.zero_table[n2] = 1
+        del self.next_table[n1]
 
 def graph_from_edges(edges):
     g = Graph()
@@ -97,29 +95,30 @@ class Graph:
     def __init__(self):
         self.edges = []
 
-    def add_edge(self, before, after):
-        self.edges.append((before,after))
+    def add_edge(self, n1, n2):
+        self.edges.append((n1,n2))
 
     def sort(self):
         index = GraphIndex()
-        for before,after in self.edges:
-            index.add(before,after)
+        for n1,n2 in self.edges:
+            index.add(n1,n2)
         ordered = []
         while True:
-            first = index.pop_zero()
-            if first:    
-                ordered.append(first)
+            n0 = index.pop_zero()
+            if n0:    
+                ordered.append(n0)
             else:
                 break
-        if index.before_table:
+        if index.prev_table:
             raise CycleException("Cycle found")
         return ordered    
 
 if __name__ == '__main__':
+    """Like unix tsort"""
     g = Graph()
     for line in fileinput.input():
-        before, after = line.split() 
-        g.add_edge(before, after)
+        n1, n2 = line.split() 
+        g.add_edge(n1, n2)
     for n in g.sort():
         print(n)
 

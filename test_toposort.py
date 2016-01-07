@@ -8,7 +8,7 @@ b = 'b'
 c = 'c'
 abc = ['a','b','c']
 
-class TestManualSortABC(unittest.TestCase):
+class TestToposort(unittest.TestCase):
 
     def assertCycle(self, edges):
         with self.assertRaises(CycleException):
