@@ -5,6 +5,7 @@ import fileinput
 # TODO: setup
 # TODO: support None value
 # TODO: investigte into yield
+# TODO: fill readme
 
 class CycleException(Exception):
 
