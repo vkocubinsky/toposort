@@ -60,7 +60,7 @@ Zero Set: {zero_table})""".format(
             self.next_table[n1][n2] = 1
             self.prev_table[n2][n1] = 1
 
-        if n2 != n1 and n2 in self.zero_table:
+        if self.prev_table[n2] and n2 in self.zero_table:
             del self.zero_table[n2]
 
     def pop_zero(self):
