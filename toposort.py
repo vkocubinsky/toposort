@@ -68,14 +68,7 @@ Zero Set: {zero_table})""".format(
         if self.prev_table[n2] and n2 in self.zero_table:
             del self.zero_table[n2]
 
-    def pop_zero(self):
-        if self.zero_table:
-            n1,_one = self.zero_table.popitem(last=False)
-            self._remove(n1)
-            return n1
-
-
-    def _remove(self, n1):
+    def remove(self, n1):
         assert n1 in self.prev_table
         assert n1 in self.next_table
         assert not self.prev_table[n1]
@@ -98,7 +91,7 @@ Zero Set: {zero_table})""".format(
             else:
                 cycle[n]=1
                 n = next(iter(self.next_table[n]))
-        raise AssertioError('Cycle not found') 
+        raise AssertionError('Cycle not found') 
 
 
 def graph_from_edges(edges):
@@ -124,8 +117,9 @@ class Graph:
             index.add(n1,n2)
         ordered = []
         while True:
-            n0 = index.pop_zero()
-            if n0:    
+            if index.zero_table:
+                n0,_one = index.zero_table.popitem(last=False)
+                index.remove(n0)
                 ordered.append(n0)
             else:
                 break

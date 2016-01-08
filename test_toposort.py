@@ -7,6 +7,7 @@ a = 'a'
 b = 'b'
 c = 'c'
 abc = ['a','b','c']
+abcnone = ['a','b','c',None]
 
 class TestToposort(unittest.TestCase):
 
@@ -102,6 +103,19 @@ class TestToposort(unittest.TestCase):
         ordered = sort_edges(edges)
         self.assertSort(edges,abc,ordered)
 
+    def test_none_before(self):
+        edges = [(None,a),(b,b),(c,c)]
+        ordered = sort_edges(edges)
+        self.assertSort(edges,abcnone,ordered)
+
+    def test_none_after(self):
+        edges = [(a,None),(b,b),(c,c)]
+        ordered = sort_edges(edges)
+        self.assertSort(edges,abcnone,ordered)
+
+    def test_none_cycle(self):
+        edges = [(None,a),(a,b),(b,c),(c,None)]
+        self.assertCycle(edges,[None,a,b,c])
 
 if __name__ == '__main__':
     unittest.main()
