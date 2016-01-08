@@ -19,7 +19,7 @@ class TestToposort(unittest.TestCase):
 
     def assertSort(self, edges, unordered, ordered):
         self.assertCountEqual(unordered, ordered)
-        self.assertOrder(edges, ordered)
+        self.assertOrder(edges, list(ordered))
 
     def assertOrder(self, edges, ordered):
         for edge in edges:

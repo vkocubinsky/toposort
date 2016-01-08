@@ -3,7 +3,7 @@ from collections import OrderedDict
 import fileinput
 
 # TODO: support None value, test none as other elements
-# TODO: yield?
+# TODO: yield
 # TODO: fill readme
 
 class CycleException(Exception):
@@ -45,27 +45,23 @@ Zero Set: {zero_table})""".format(
                 )
 
     def add(self, n1, n2):
-        # Initialize next_table    
-        if n1 not in self.next_table:
-            self.next_table[n1] = OrderedDict()
-        if n2 not in self.next_table:
-            self.next_table[n2] = OrderedDict()
+        self.next_table.setdefault(n1,OrderedDict())
+        self.next_table.setdefault(n2,OrderedDict())
 
-        # Initialize prev_table
-        if n1 not in self.prev_table:
-            self.prev_table[n1] = OrderedDict()
-            self.zero_table[n1] = 1
-        if n2 not in self.prev_table:
-            self.prev_table[n2] = OrderedDict()
-            self.zero_table[n2] = 1
+        self.prev_table.setdefault(n1,OrderedDict())
+        self.prev_table.setdefault(n2,OrderedDict())
 
-        # Put deps
         if n2 != n1:
             self.next_table[n1][n2] = 1
             self.prev_table[n2][n1] = 1
 
-        if self.prev_table[n2] and n2 in self.zero_table:
+        if not self.prev_table[n1]:
+            self.zero_table[n1] = 1
+        if not self.prev_table[n2]:
+            self.zero_table[n2] = 1
+        elif n2 in self.zero_table:
             del self.zero_table[n2]
+
 
     def remove(self, n1):
         assert n1 in self.prev_table
@@ -115,13 +111,10 @@ class Graph:
         for n1,n2 in self.edges:
             index.add(n1,n2)
         ordered = []
-        while True:
-            if index.zero_table:
-                n0,_one = index.zero_table.popitem(last=False)
-                index.remove(n0)
-                ordered.append(n0)
-            else:
-                break
+        while index.zero_table:
+            n0,_one = index.zero_table.popitem(last=False)
+            index.remove(n0)
+            ordered.append(n0)
         if index.prev_table:
             raise CycleException(index.first_cycle())
         return ordered    
