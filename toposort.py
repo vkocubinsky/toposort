@@ -2,9 +2,8 @@
 from collections import OrderedDict
 import fileinput
 
-# TODO: setup
-# TODO: support None value
-# TODO: investigte into yield
+# TODO: support None value, test none as other elements
+# TODO: yield?
 # TODO: fill readme
 
 class CycleException(Exception):
