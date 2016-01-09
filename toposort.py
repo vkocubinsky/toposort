@@ -3,8 +3,8 @@ from collections import OrderedDict
 import fileinput
 
 # TODO: support None value, test none as other elements
-# TODO: yield
 # TODO: fill readme
+# TODO: argparse and -o keys
 
 class CycleException(Exception):
 
@@ -45,11 +45,15 @@ Zero Set: {zero_table})""".format(
                 )
 
     def add(self, n1, n2):
-        self.next_table.setdefault(n1,OrderedDict())
-        self.next_table.setdefault(n2,OrderedDict())
+        def init_table(table, n):
+            if n not in table:
+                table[n] = OrderedDict()
 
-        self.prev_table.setdefault(n1,OrderedDict())
-        self.prev_table.setdefault(n2,OrderedDict())
+        init_table(self.next_table,n1)
+        init_table(self.next_table,n2)
+
+        init_table(self.prev_table,n1)
+        init_table(self.prev_table,n2)
 
         if n2 != n1:
             self.next_table[n1][n2] = 1
