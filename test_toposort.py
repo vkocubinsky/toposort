@@ -13,13 +13,14 @@ class TestToposort(unittest.TestCase):
 
     def assertCycle(self, edges, cycle=None):
         with self.assertRaises(CycleException) as e:
-            sort_edges(edges)
+            list(sort_edges(edges))
         if cycle: 
             self.assertEqual(cycle, e.exception.cycle)    
 
     def assertSort(self, edges, unordered, ordered):
-        self.assertCountEqual(unordered, ordered)
-        self.assertOrder(edges, list(ordered))
+        lordered = list(ordered)
+        self.assertCountEqual(unordered, lordered)
+        self.assertOrder(edges, lordered)
 
     def assertOrder(self, edges, ordered):
         for edge in edges:

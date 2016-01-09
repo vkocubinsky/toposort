@@ -110,14 +110,12 @@ class Graph:
         index = GraphIndex()
         for n1,n2 in self.edges:
             index.add(n1,n2)
-        ordered = []
         while index.zero_table:
             n0,_one = index.zero_table.popitem(last=False)
             index.remove(n0)
-            ordered.append(n0)
+            yield n0
         if index.prev_table:
             raise CycleException(index.first_cycle())
-        return ordered    
 
 if __name__ == '__main__':
     """Like unix tsort"""
