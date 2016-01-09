@@ -93,40 +93,19 @@ Zero Set: {zero_table})""".format(
         raise AssertionError('Cycle not found') 
 
 
-def graph_from_edges(edges):
-    g = Graph()
-    for edge in edges:
-        g.add_edge(*edge)
-    return g
-
 def sort_edges(edges):
-    g = graph_from_edges(edges)
-    return g.sort()
-
-class Graph:
-    def __init__(self):
-        self.edges = []
-
-    def add_edge(self, n1, n2):
-        self.edges.append((n1,n2))
-
-    def sort(self):
-        index = GraphIndex()
-        for n1,n2 in self.edges:
-            index.add(n1,n2)
-        while index.zero_table:
-            n0,_one = index.zero_table.popitem(last=False)
-            index.remove(n0)
-            yield n0
-        if index.prev_table:
-            raise CycleException(index.first_cycle())
+    index = GraphIndex()
+    for n1,n2 in edges:
+        index.add(n1,n2)
+    while index.zero_table:
+        n0,_one = index.zero_table.popitem(last=False)
+        index.remove(n0)
+        yield n0
+    if index.prev_table:
+        raise CycleException(index.first_cycle())
 
 if __name__ == '__main__':
     """Like unix tsort"""
-    g = Graph()
-    for line in fileinput.input():
-        n1, n2 = line.split() 
-        g.add_edge(n1, n2)
-    for n in g.sort():
+    for n in sort_edges(tuple(line.split()) for line in fileinput.input()): 
         print(n)
 
