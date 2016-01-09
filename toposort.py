@@ -44,7 +44,15 @@ Zero Set: {zero_table})""".format(
             zero_table=list(self.zero_table.keys())    
                 )
 
-    def add(self, n1, n2):
+    def add_node(self,n):
+        if n not in self.next_table:
+            self.next_table[n] = OrderedDict()
+        if n not in self.prev_table:
+            self.prev_table[n] = OrderedDict()
+            self.zero_table[n] = 1
+    
+    def add_edge(self,n1,n2):
+        assert n1 != n2
         if n1 not in self.next_table:
             self.next_table[n1] = OrderedDict()
         if n2 not in self.next_table:
@@ -55,15 +63,20 @@ Zero Set: {zero_table})""".format(
             self.zero_table[n1] = 1
         if n2 not in self.prev_table:
             self.prev_table[n2] = OrderedDict()
-            self.zero_table[n2] = 1
 
-            
-        if n2 != n1:
-            self.next_table[n1][n2] = 1
-            self.prev_table[n2][n1] = 1
-            if n2 in self.zero_table:
-                del self.zero_table[n2]
+        self.next_table[n1][n2] = 1
+        self.prev_table[n2][n1] = 1
 
+        if n2 in self.zero_table:
+            del self.zero_table[n2]
+
+
+
+    def add(self, n1, n2):
+        if n2 == n1:    
+            self.add_node(n2)
+        else:
+            self.add_edge(n1,n2)
 
     def remove(self, n1):
         assert n1 in self.prev_table
