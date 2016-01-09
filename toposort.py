@@ -45,26 +45,24 @@ Zero Set: {zero_table})""".format(
                 )
 
     def add(self, n1, n2):
-        def init_table(table, n):
-            if n not in table:
-                table[n] = OrderedDict()
+        if n1 not in self.next_table:
+            self.next_table[n1] = OrderedDict()
+        if n2 not in self.next_table:
+            self.next_table[n2] = OrderedDict()
 
-        init_table(self.next_table,n1)
-        init_table(self.next_table,n2)
+        if n1 not in self.prev_table:
+            self.prev_table[n1] = OrderedDict()
+            self.zero_table[n1] = 1
+        if n2 not in self.prev_table:
+            self.prev_table[n2] = OrderedDict()
+            self.zero_table[n2] = 1
 
-        init_table(self.prev_table,n1)
-        init_table(self.prev_table,n2)
-
+            
         if n2 != n1:
             self.next_table[n1][n2] = 1
             self.prev_table[n2][n1] = 1
-
-        if not self.prev_table[n1]:
-            self.zero_table[n1] = 1
-        if not self.prev_table[n2]:
-            self.zero_table[n2] = 1
-        elif n2 in self.zero_table:
-            del self.zero_table[n2]
+            if n2 in self.zero_table:
+                del self.zero_table[n2]
 
 
     def remove(self, n1):
@@ -73,7 +71,7 @@ Zero Set: {zero_table})""".format(
         assert not self.prev_table[n1]
         
         del self.prev_table[n1]            
-        for n2 in self.next_table[n1].keys():
+        for n2 in self.next_table[n1]:
             del self.prev_table[n2][n1]
             if not self.prev_table[n2]:
                 self.zero_table[n2] = 1
