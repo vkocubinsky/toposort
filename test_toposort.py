@@ -7,9 +7,16 @@ a = 'a'
 b = 'b'
 c = 'c'
 abc = ['a','b','c']
-abcnone = ['a','b','c',None]
 
-class TestToposort(unittest.TestCase):
+class ToposortTestCase(unittest.TestCase):
+
+    def distinct_nodes(self,edges):
+        nodes = set()
+        for edge in edges:
+            nodes.add(edge[0])
+            nodes.add(edge[1])
+        return nodes    
+
 
     def assertCycle(self, edges, cycle=None):
         with self.assertRaises(CycleException) as e:
@@ -17,10 +24,15 @@ class TestToposort(unittest.TestCase):
         if cycle: 
             self.assertEqual(cycle, e.exception.cycle)    
 
-    def assertSort(self, edges, unordered, ordered):
-        lordered = list(ordered)
-        self.assertCountEqual(unordered, lordered)
-        self.assertOrder(edges, lordered)
+    def assertSort(self, edges_iter):
+        edges_list = list(edges_iter)
+        allnodes = self.distinct_nodes(edges_list)
+        for edges in (list(edges_list),iter(edges_list)):
+            with self.subTest(edges_type = str(type(edges))):
+                sorted_iter = sort_edges(edges)
+                sorted_list = list(sorted_iter)
+                self.assertCountEqual(sorted_list, allnodes)
+                self.assertOrder(edges, sorted_list)
 
     def assertOrder(self, edges, ordered):
         for edge in edges:
@@ -32,91 +44,89 @@ class TestToposort(unittest.TestCase):
     def assertOrderLess(self, a, b, ordered):
         self.assertTrue(ordered.index(a) < ordered.index(b)) 
 
+
+class ZeroNodesTestCase(ToposortTestCase):
+
+    def testZero(self):
+        self.assertSort([])
+   
+
+class TwoNodesTestCase(ToposortTestCase):
+    
+    def testTwo(self):
+        for n1 in (a,None,False,True): 
+            for n2 in (a,None,False,True): 
+                edges = [(n1,n2)]
+                with self.subTest(edges=edges):
+                    self.assertSort(edges)
+
+class ThreeNodesTestCase(ToposortTestCase):
+
+
     def test_no_lines(self):
-        """No lines: a = a, b = b, c = c"""
+        """a = a, b = b, c = c"""
         edges = [(a,a), (b,b), (c,c)]
-        ordered = sort_edges(edges)
-        self.assertSort(edges, abc, ordered)
+        self.assertSort(edges)
 
     def test_2_nodes_line(self):
-        """2 nodes line: a < b, c = c"""
+        """a < b, c = c"""
         edges = [(a,b),(c,c)]
-        ordered = sort_edges(edges)
-        self.assertSort(edges, abc, ordered)
+        self.assertSort(edges)
 
     def test_3_nodes_line(self):
-        """3 nodes line: a < b < c"""
+        """a < b < c"""
         edges = [(a,b),(b,c)]
-        ordered = sort_edges(edges)
-        self.assertSort(edges, abc, ordered)
+        self.assertSort(edges)
 
     def test_split(self):
-        """Split: a < b, a < c"""
+        """a < b, a < c"""
         edges = [(a,b),(a,c)]
-        ordered = sort_edges(edges)
-        self.assertSort(edges, abc, ordered)
+        self.assertSort(edges)
 
     def test_join(self):
-        """Join : a < c, b < c"""  
+        """a < c, b < c"""  
         edges = [(a,c),(b,c)]
-        ordered = sort_edges(edges)
-        self.assertSort(edges, abc, ordered)
+        self.assertSort(edges)
 
     def test_2_nodes_cycle(self):
-        """2 nodes line cycle: a < b < a, c = c"""
+        """a < b < a, c = c"""
         edges = [(a,b),(b,a),(c,c)]
         self.assertCycle(edges, [a,b])
 
     def test_3_nodes_cycle(self):
-        """3 nodes line cycle: a < b < c < a"""
+        """a < b < c < a"""
         edges = [(a,b),(b,c),(c,a)]
         self.assertCycle(edges,[a,b,c])
 
     def test_join_and_cycle_either(self):
-        """Join and cycle either: a < c, b < c, c < a, c < b"""
+        """a < c, b < c, c < a, c < b"""
         edges = [(a,c),(b,c),(c,a),(c,b)]
         self.assertCycle(edges, [a,c]) # there are 2 cycle
 
     def test_join_and_cycle_one(self):
-        """Join and cycle either: a < c, b < c, c < a"""
+        """a < c, b < c, c < a"""
         edges = [(a,c),(b,c),(c,a)]
         self.assertCycle(edges,[a,c])
 
     def test_split_and_cycle_either(self):
-        """Split and cycle either: a < b, a < c, b < a, c < a"""
+        """a < b, a < c, b < a, c < a"""
         edges = [(a,b),(a,c),(b,a),(c,a)]
         self.assertCycle(edges, [a,b]) # there are 2 cycle
 
     def test_split_and_cycle_one(self):
-        """Split and cycle one: a < b, a < c, b < a"""
+        """a < b, a < c, b < a"""
         edges = [(a,b),(a,c),(b,a)]
         self.assertCycle(edges, [a,b])
 
     def test_duplicate(self):
-        """Duplicate: a < b , a < b, c = c"""
+        """a < b , a < b, c = c"""
         edges = [(a,b),(a,b),(c,c)]
-        ordered = sort_edges(edges)
-        self.assertSort(edges,abc,ordered)
+        self.assertSort(edges)
 
     def test_transitive(self):
-        """Transitive: a < b, b < c, a < c"""
+        """a < b, b < c, a < c"""
         edges = [(a,b),(b,c),(a,c)]
-        ordered = sort_edges(edges)
-        self.assertSort(edges,abc,ordered)
-
-    def test_none_before(self):
-        edges = [(None,a),(b,b),(c,c)]
-        ordered = sort_edges(edges)
-        self.assertSort(edges,abcnone,ordered)
-
-    def test_none_after(self):
-        edges = [(a,None),(b,b),(c,c)]
-        ordered = sort_edges(edges)
-        self.assertSort(edges,abcnone,ordered)
-
-    def test_none_cycle(self):
-        edges = [(None,a),(a,b),(b,c),(c,None)]
-        self.assertCycle(edges,[None,a,b,c])
+        self.assertSort(edges)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 from collections import OrderedDict
+from collections import namedtuple
 import fileinput
 
 # TODO: support None value, test none as other elements
 # TODO: fill readme
 # TODO: argparse and -o keys
+
+Edge = namedtuple('Edge',['n1','n2'])
 
 class CycleException(Exception):
 
