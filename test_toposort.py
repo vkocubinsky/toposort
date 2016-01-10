@@ -6,7 +6,6 @@ from toposort import *
 a = 'a'
 b = 'b'
 c = 'c'
-abc = ['a','b','c']
 
 class ToposortTestCase(unittest.TestCase):
 
@@ -127,6 +126,8 @@ class ThreeNodesTestCase(ToposortTestCase):
         """a < b, b < c, a < c"""
         edges = [(a,b),(b,c),(a,c)]
         self.assertSort(edges)
+
+
 
 if __name__ == '__main__':
     unittest.main()
